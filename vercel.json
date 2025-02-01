@@ -1,15 +1,14 @@
 {
-  "buildCommand": "turbo run build --filter=frontend",
+  "buildCommand": "turbo run build",
   "installCommand": "npm install",
-  "outputDirectory": "dist",
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "backend/$1"
+      "dest": "apps/backend/dist/main.js"
     },
     {
       "src": "/(.*)",
-      "dest": "/"
+      "dest": "apps/frontend/dist/index.html"
     }
   ],
   "framework": "vite"
