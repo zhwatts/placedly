@@ -39,3 +39,6 @@ coverage/
 
 *.spec*
 *-spec*
+
+# Vercel
+.vercel
