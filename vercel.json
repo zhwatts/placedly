@@ -1,5 +1,5 @@
 {
-  "buildCommand": "turbo run build --filter=apps/*",
+  "buildCommand": "turbo run build --filter=apps/frontend...",
   "installCommand": "npm install",
   "routes": [
     {
