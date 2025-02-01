@@ -4,8 +4,6 @@
   <img src="apps/frontend/public/placedly_logo.png" alt="Placedly Logo" width="500"/>
 </p>
 
-<h1 align="center">Placedly</h1>
-
 <p align="center">
   An app that connects people to their perfect community
 </p>
