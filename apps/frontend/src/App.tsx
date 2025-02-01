@@ -11,10 +11,12 @@ import {
   Snackbar,
   Alert,
   Button,
+  CircularProgress,
 } from "@mui/material";
 import { theme } from "./theme";
 import { MapBackground } from "./components/MapBackground";
 import { useState } from "react";
+import { BottomNav } from "./components/BottomNav";
 
 interface Location {
   city: string | null;
@@ -73,6 +75,7 @@ function LocationInfo() {
   const {
     location,
     weather,
+    isLoadingLocation,
     isLoadingWeather,
     weatherError,
     showLocationWarning,
@@ -116,10 +119,36 @@ function LocationInfo() {
       return "your current location";
     }
     const prefix = location.isApproximate
-      ? "we think you're around "
-      : "you're in ";
+      ? "We think you're around "
+      : "Looking good in ";
     return `${prefix}${location.city}, ${location.region}`;
   };
+
+  if (isLoadingLocation || isLoadingWeather) {
+    return (
+      <Box
+        sx={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          bgcolor: "background.default",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 3,
+        }}
+      >
+        <CircularProgress size={60} sx={{ color: "primary.main" }} />
+        <Typography variant="h5" sx={{ color: "text.primary" }}>
+          Hang tight, we're looking you up...
+        </Typography>
+        <BottomNav />
+      </Box>
+    );
+  }
 
   return (
     <>
@@ -142,12 +171,10 @@ function LocationInfo() {
           Hello! {location && getLocationString(location)}
         </Typography>
         <Typography variant="h5" sx={{ mb: 3 }}>
-          It is currently {date}, and the time is {time}
+          It's {date}, and the time is {time}
         </Typography>
 
-        {isLoadingWeather ? (
-          <Typography>Loading weather...</Typography>
-        ) : weatherError ? (
+        {weatherError ? (
           <Typography color="error">
             Sorry, I was unable to load weather forecast
           </Typography>
@@ -155,6 +182,8 @@ function LocationInfo() {
           <WeatherContent weather={weather} />
         ) : null}
       </Box>
+
+      <BottomNav />
 
       <Snackbar
         open={showLocationWarning && showSnackbar}
