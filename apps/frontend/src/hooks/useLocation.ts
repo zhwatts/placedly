@@ -9,6 +9,7 @@ interface Location {
   region: string | null;
   country: string | null;
   ll: [number, number];
+  isApproximate: boolean;
 }
 
 interface Weather {
@@ -23,77 +24,69 @@ export const useLocation = () => {
   const [coordinates, setCoordinates] = useState<GeolocationCoordinates | null>(
     null
   );
-  const [locationDetails, setLocationDetails] = useState<{
-    city: string | null;
-    region: string | null;
-  } | null>(null);
+  const [geoLocationDenied, setGeoLocationDenied] = useState(false);
+  const [showLocationWarning, setShowLocationWarning] = useState(false);
 
   useEffect(() => {
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
-        async (position) => {
+        (position) => {
           setCoordinates(position.coords);
-
-          // Reverse geocode the coordinates
-          try {
-            const response = await fetch(
-              `https://api.mapbox.com/geocoding/v5/mapbox.places/${
-                position.coords.longitude
-              },${position.coords.latitude}.json?access_token=${
-                import.meta.env.VITE_MAPBOX_TOKEN
-              }&types=place,region`
-            );
-            const data = await response.json();
-
-            const city = data.features.find((f: any) =>
-              f.place_type.includes("place")
-            )?.text;
-            const region = data.features.find((f: any) =>
-              f.place_type.includes("region")
-            )?.text;
-
-            setLocationDetails({ city, region });
-          } catch (error) {
-            console.error("Geocoding error:", error);
-          }
+          setShowLocationWarning(false);
         },
         (error) => {
           console.log("Geolocation error:", error);
-          setCoordinates(null);
+          setGeoLocationDenied(true);
+          setShowLocationWarning(true);
         }
       );
+    } else {
+      setGeoLocationDenied(true);
+      setShowLocationWarning(true);
     }
   }, []);
 
-  // We only need one query now - for weather
-  const weatherQuery = useQuery<Weather>({
-    queryKey: ["weather", coordinates?.latitude, coordinates?.longitude],
+  const locationQuery = useQuery<Location>({
+    queryKey: ["location", coordinates?.latitude, coordinates?.longitude],
     queryFn: async () => {
-      if (!coordinates) throw new Error("No coordinates available");
+      const params = coordinates
+        ? {
+            lat: coordinates.latitude,
+            lon: coordinates.longitude,
+          }
+        : {};
+      const { data } = await axios.get("/api/location", { params });
+      return data;
+    },
+    enabled: coordinates !== null || geoLocationDenied,
+  });
+
+  const weatherQuery = useQuery<Weather>({
+    queryKey: [
+      "weather",
+      locationQuery.data?.ll?.[0],
+      locationQuery.data?.ll?.[1],
+    ],
+    queryFn: async () => {
+      if (!locationQuery.data?.ll) throw new Error("No coordinates available");
       const { data } = await axios.get("/api/location/weather", {
         params: {
-          lat: coordinates.latitude,
-          lon: coordinates.longitude,
+          lat: locationQuery.data.ll[0],
+          lon: locationQuery.data.ll[1],
         },
       });
       return data;
     },
-    enabled: !!coordinates,
+    enabled: !!locationQuery.data?.ll,
   });
 
   return {
-    location: coordinates
-      ? {
-          city: locationDetails?.city || null,
-          region: locationDetails?.region || null,
-          country: "US",
-          ll: [coordinates.latitude, coordinates.longitude] as [number, number],
-        }
-      : null,
+    location: locationQuery.data,
     weather: weatherQuery.data,
-    isLoadingLocation: false,
+    isLoadingLocation: locationQuery.isLoading,
     isLoadingWeather: weatherQuery.isLoading,
-    locationError: null,
+    locationError: locationQuery.error,
     weatherError: weatherQuery.error,
+    showLocationWarning,
   };
 };

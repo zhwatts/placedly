@@ -37,4 +37,5 @@ coverage/
 
 .turbo/*
 
-*.spec.ts
+*.spec*
+*-spec*

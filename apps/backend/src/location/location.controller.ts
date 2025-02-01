@@ -30,40 +30,15 @@ export class LocationController {
   @ApiQuery({ name: "lat", required: false })
   @ApiQuery({ name: "lon", required: false })
   async getLocation(
-    @Req() request: Request,
+    @Req() req: Request,
     @Query("lat") lat?: string,
     @Query("lon") lon?: string
   ) {
-    try {
-      // If coordinates are provided, use them as primary source
-      if (lat && lon) {
-        return await this.locationService.getLocationFromCoordinates(
-          parseFloat(lat),
-          parseFloat(lon)
-        );
-      }
-
-      // Fallback to IP-based location
-      const ip =
-        request.headers["x-forwarded-for"]?.toString() ||
-        request.ip ||
-        request.socket.remoteAddress ||
-        "127.0.0.1";
-
-      return this.locationService.getLocationFromIP(ip);
-    } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      }
-      throw new HttpException(
-        {
-          status: HttpStatus.INTERNAL_SERVER_ERROR,
-          error: "Location Service Error",
-          message: "Error determining location",
-        },
-        HttpStatus.INTERNAL_SERVER_ERROR
-      );
-    }
+    return this.locationService.getLocation(
+      req,
+      lat ? parseFloat(lat) : undefined,
+      lon ? parseFloat(lon) : undefined
+    );
   }
 
   @Get("weather")

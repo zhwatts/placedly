@@ -1,107 +1,107 @@
 /** @format */
 
 import { Injectable, HttpException, HttpStatus } from "@nestjs/common";
-import * as geoip from "geoip-lite";
-import * as NodeGeocoder from "node-geocoder";
+import { HttpService } from "@nestjs/axios";
+import { firstValueFrom } from "rxjs";
+import { Request } from "express";
+import { EnvValidationService } from "../config/env.validation";
+
+interface IpApiResponse {
+  status: string;
+  city: string;
+  region: string;
+  country: string;
+  lat: number;
+  lon: number;
+}
 
 @Injectable()
 export class LocationService {
-  private readonly geocoder: NodeGeocoder.Geocoder;
+  constructor(
+    private readonly httpService: HttpService,
+    private readonly envValidationService: EnvValidationService
+  ) {}
 
-  constructor() {
-    // Initialize with offline provider
-    this.geocoder = NodeGeocoder({
-      provider: "openstreetmap",
-      // No API key needed, works offline with local database
-    });
-  }
-
-  async getLocationFromCoordinates(lat: number, lon: number) {
+  async getLocation(req: Request, lat?: number, lon?: number) {
     try {
-      const results = await this.geocoder.reverse({ lat, lon });
-      const location = results[0];
+      if (lat && lon) {
+        // Use reverse geocoding when coordinates are provided
+        const { data } = await firstValueFrom<{ data: IpApiResponse }>(
+          this.httpService.get(`http://ip-api.com/json/?lat=${lat}&lon=${lon}`)
+        );
 
-      if (location) {
+        if (data.status === "fail") {
+          throw new Error("Geocoding failed");
+        }
+
         return {
-          city: location.city || null,
-          region:
-            location.state || location.administrativeLevels?.level1long || null,
-          country: location.country || null,
+          city: data.city,
+          region: data.region,
+          country: data.country,
           ll: [lat, lon],
+          isApproximate: false,
         };
       }
-    } catch (error) {
-      console.error("Geocoding error:", error);
-    }
 
-    // Fallback if geocoding fails
-    return {
-      city: null,
-      region: null,
-      country: null,
-      ll: [lat, lon],
-    };
-  }
+      // Get client IP for IP-based location
+      const clientIp = this.getClientIp(req);
+      const ipToCheck = this.isLocalhost(clientIp) ? "8.8.8.8" : clientIp;
 
-  getLocationFromIP(ip: string) {
-    // Only use IP-based location as fallback
-    const cleanIP = this.cleanIPAddress(ip);
-    if (!cleanIP) {
-      if (process.env.NODE_ENV === "development") {
-        return this.getMockLocation();
+      const { data } = await firstValueFrom<{ data: IpApiResponse }>(
+        this.httpService.get(`http://ip-api.com/json/${ipToCheck}`)
+      );
+
+      if (data.status === "fail") {
+        throw new Error("IP geolocation failed");
       }
+
+      return {
+        city: data.city,
+        region: data.region,
+        country: data.country,
+        ll: [data.lat, data.lon],
+        isApproximate: true,
+      };
+    } catch (error) {
+      console.error("Location service error:", error);
+
+      if (process.env.NODE_ENV === "development") {
+        return {
+          city: "Atlanta",
+          region: "GA",
+          country: "US",
+          ll: [33.7488, -84.3877],
+          isApproximate: true,
+        };
+      }
+
       throw new HttpException(
         {
-          status: HttpStatus.NOT_FOUND,
-          error: "Location Not Found",
-          message: "Unable to determine location from IP address",
+          status: HttpStatus.SERVICE_UNAVAILABLE,
+          error: "Location Service Unavailable",
+          message: "Unable to determine location",
         },
-        HttpStatus.NOT_FOUND
+        HttpStatus.SERVICE_UNAVAILABLE
       );
     }
-
-    const geo = geoip.lookup(cleanIP);
-    if (!geo) {
-      throw new HttpException(
-        {
-          status: HttpStatus.NOT_FOUND,
-          error: "Location Not Found",
-          message: "Unable to determine location from IP address",
-        },
-        HttpStatus.NOT_FOUND
-      );
-    }
-
-    return {
-      city: geo.city || null,
-      region: geo.region || null,
-      country: geo.country || null,
-      ll: geo.ll,
-    };
   }
 
-  private cleanIPAddress(ip: string): string | null {
-    if (ip === "::1" || ip === "::ffff:127.0.0.1") {
-      return null;
+  private getClientIp(req: Request): string {
+    const forwardedFor = req.headers["x-forwarded-for"];
+    if (forwardedFor) {
+      return Array.isArray(forwardedFor)
+        ? forwardedFor[0]
+        : forwardedFor.split(",")[0];
     }
-
-    if (ip.startsWith("::ffff:")) {
-      ip = ip.substring(7);
-    }
-
-    if (ip === "127.0.0.1" || ip === "localhost") {
-      return null;
-    }
-
-    return ip;
+    return req.ip || req.socket.remoteAddress || "127.0.0.1";
   }
 
-  private getMockLocation() {
-    return {
-      city: "Atlanta",
-      region: "GA",
-      country: "US",
-      ll: [33.749, -84.388],
-    };
+  private isLocalhost(ip: string): boolean {
+    return (
+      ip === "127.0.0.1" ||
+      ip === "::1" ||
+      ip === "::ffff:127.0.0.1" ||
+      ip === "localhost"
+    );
   }
 }

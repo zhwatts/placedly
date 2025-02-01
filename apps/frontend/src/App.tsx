@@ -4,15 +4,24 @@ import { useLocation } from "./hooks/useLocation";
 import { useCurrentTime } from "./hooks/useCurrentTime";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from "@mui/material/styles";
-import { CssBaseline, Typography, Box } from "@mui/material";
+import {
+  CssBaseline,
+  Typography,
+  Box,
+  Snackbar,
+  Alert,
+  Button,
+} from "@mui/material";
 import { theme } from "./theme";
 import { MapBackground } from "./components/MapBackground";
+import { useState } from "react";
 
 interface Location {
   city: string | null;
   region: string | null;
   country: string | null;
   ll: [number, number];
+  isApproximate: boolean;
 }
 
 const queryClient = new QueryClient();
@@ -61,13 +70,56 @@ function WeatherContent({ weather }: { weather: any }) {
 }
 
 function LocationInfo() {
-  const { location, weather, isLoadingWeather, weatherError } = useLocation();
+  const {
+    location,
+    weather,
+    isLoadingWeather,
+    weatherError,
+    showLocationWarning,
+  } = useLocation();
   const { date, time } = useCurrentTime();
+  const [showSnackbar, setShowSnackbar] = useState(true);
+  const [showPermissionError, setShowPermissionError] = useState(false);
 
-  const getLocationString = (location: Location) =>
-    location.city && location.region
-      ? `${location.city}, ${location.region}`
-      : "your current location";
+  const handleRequestGeolocation = async () => {
+    if ("geolocation" in navigator) {
+      try {
+        const permission = await navigator.permissions.query({
+          name: "geolocation",
+        });
+
+        if (permission.state === "denied") {
+          // Show instructions for enabling in browser settings
+          setShowPermissionError(true);
+          return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            window.location.reload();
+          },
+          (error) => {
+            console.log("Geolocation error:", error);
+            setShowPermissionError(true);
+          },
+          { enableHighAccuracy: true, maximumAge: 0 }
+        );
+      } catch (error) {
+        console.error("Permission error:", error);
+        setShowPermissionError(true);
+      }
+    }
+  };
+
+  const getLocationString = (location: Location) => {
+    if (!location.city || !location.region) {
+      return "your current location";
+    }
+    const prefix = location.isApproximate
+      ? "we think you're around "
+      : "you're in ";
+    return `${prefix}${location.city}, ${location.region}`;
+  };
 
   return (
     <>
@@ -87,7 +139,7 @@ function LocationInfo() {
         }}
       >
         <Typography variant="h4" gutterBottom>
-          Hello! Looks like you're in {location && getLocationString(location)}.
+          Hello! {location && getLocationString(location)}
         </Typography>
         <Typography variant="h5" sx={{ mb: 3 }}>
           It is currently {date}, and the time is {time}
@@ -103,6 +155,46 @@ function LocationInfo() {
           <WeatherContent weather={weather} />
         ) : null}
       </Box>
+
+      <Snackbar
+        open={showLocationWarning && showSnackbar}
+        autoHideDuration={null}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          severity="warning"
+          sx={{ width: "100%" }}
+          action={
+            <Button
+              color="inherit"
+              size="small"
+              onClick={handleRequestGeolocation}
+            >
+              Enable Location
+            </Button>
+          }
+          onClose={() => setShowSnackbar(false)}
+        >
+          Using approximate location. Enable location services for better
+          accuracy.
+        </Alert>
+      </Snackbar>
+
+      <Snackbar
+        open={showPermissionError}
+        autoHideDuration={6000}
+        onClose={() => setShowPermissionError(false)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          severity="info"
+          sx={{ width: "100%" }}
+          onClose={() => setShowPermissionError(false)}
+        >
+          Please enable location access in your browser settings and refresh the
+          page.
+        </Alert>
+      </Snackbar>
     </>
   );
 }
