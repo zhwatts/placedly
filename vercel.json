@@ -1,25 +1,15 @@
 {
-  "version": 2,
-  "buildCommand": "turbo run build",
-  "devCommand": "turbo run dev",
+  "framework": "vite",
+  "buildCommand": "npm run build",
+  "outputDirectory": "apps/frontend/dist",
   "installCommand": "npm install",
-  "framework": null,
-  "outputDirectory": ".",
   "builds": [
     {
-      "src": "apps/backend/src/main.ts",
+      "src": "apps/frontend/package.json",
       "use": "@vercel/node"
-    },
-    {
-      "src": "apps/frontend/dist/**",
-      "use": "@vercel/static"
     }
   ],
   "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "apps/backend/src/main.ts"
-    },
     {
       "src": "/(.*)",
       "dest": "apps/frontend/dist/$1"

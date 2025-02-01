@@ -24,9 +24,69 @@
   <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
   [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
-## Description
+<p align="center">
+  <img src="apps/frontend/public/placedly_logo.png" alt="Placedly Logo" width="200"/>
+</p>
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+<h1 align="center">Placedly</h1>
+
+<p align="center">
+  An app that connects people to their perfect community
+</p>
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js (v18 or higher)
+- npm (v10 or higher)
+- A Mapbox API key
+- An OpenWeather API key
+
+### Environment Setup
+
+1. Create environment files:
+
+```bash
+# Frontend environment
+cp apps/frontend/.env.example apps/frontend/.env
+
+# Backend environment
+cp apps/backend/.env.example apps/backend/.env
+```
+
+2. Add your API keys to the environment files:
+
+```env
+# apps/frontend/.env
+VITE_MAPBOX_TOKEN=your_mapbox_token_here
+
+# apps/backend/.env
+OPENWEATHER_API_KEY=your_openweather_api_key_here
+```
+
+
+### Development
+
+```bash
+# Run both frontend and backend
+npm run dev
+
+# Run frontend only
+npm run dev:frontend
+
+# Run backend only
+npm run dev:backend
+```
+The frontend will be available at `http://localhost:5173`
+The backend API will be available at `http://localhost:3000`
+
+## Tech Stack
+
+- **Frontend**: React, Material-UI, Vite
+- **Backend**: NestJS
+- **APIs**: Mapbox, OpenWeather
+
 
 ## Project setup
 
@@ -46,72 +106,3 @@ $ npm run start:dev
 # production mode
 $ npm run start:prod
 ```
-
-## Run tests
-
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
-```
-
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ npm install -g mau
-$ mau deploy
-```
-
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
-
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
-
-# Your Project Name
-
-This is a monorepo containing both frontend and backend applications.
-
-## Project Structure
-
-```
-├── apps
-│   ├── backend    # NestJS API
-│   └── frontend   # Vite + React frontend
-├── package.json
-└── turbo.json
-```
-
-## Getting
