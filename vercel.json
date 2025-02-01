@@ -1,20 +1,15 @@
 {
-  "buildCommand": "turbo run build",
+  "buildCommand": "turbo run build --filter=frontend^...",
   "installCommand": "npm install",
   "outputDirectory": "apps/frontend/dist",
-  "functions": {
-    "api/index.js": {
-      "runtime": "nodejs18.x"
-    }
-  },
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "apps/backend/dist/main.js"
+      "dest": "backend/$1"
     },
     {
       "src": "/(.*)",
-      "dest": "apps/frontend/dist/index.html"
+      "dest": "/"
     }
   ],
   "framework": "vite"

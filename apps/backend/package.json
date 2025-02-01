@@ -19,7 +19,8 @@
   "scripts": {
     "dev": "nest start --watch",
     "build": "nest build",
-    "start": "node dist/main"
+    "start": "node dist/main",
+    "start:serverless": "node dist/main"
   },
   "devDependencies": {
     "@types/jest": "^29.5.14"
