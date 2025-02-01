@@ -2,6 +2,11 @@
   "buildCommand": "turbo run build",
   "installCommand": "npm install",
   "outputDirectory": "apps/frontend/dist",
+  "functions": {
+    "api/index.js": {
+      "runtime": "nodejs18.x"
+    }
+  },
   "routes": [
     {
       "src": "/api/(.*)",
@@ -9,7 +14,7 @@
     },
     {
       "src": "/(.*)",
-      "dest": "/"
+      "dest": "apps/frontend/dist/index.html"
     }
   ],
   "framework": "vite"

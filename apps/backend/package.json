@@ -7,6 +7,8 @@
     "@types/cors": "^2.8.17",
     "@types/geoip-lite": "^1.4.4",
     "@types/node-geocoder": "^4.2.6",
+    "@vendia/serverless-express": "^4.12.6",
+    "aws-lambda": "^1.0.7",
     "axios": "^1.7.9",
     "cors": "^2.8.5",
     "geoip-lite": "^1.4.10",
