@@ -1,0 +1,25 @@
+{
+  "name": "backend",
+  "dependencies": {
+    "@nestjs/axios": "^4.0.0",
+    "@nestjs/config": "^x.x.x",
+    "@nestjs/testing": "^11.0.7",
+    "@types/cors": "^2.8.17",
+    "@types/geoip-lite": "^1.4.4",
+    "@types/node-geocoder": "^4.2.6",
+    "axios": "^1.7.9",
+    "cors": "^2.8.5",
+    "geoip-lite": "^1.4.10",
+    "node-geocoder": "^4.4.1",
+    "reflect-metadata": "^0.2.0",
+    "rxjs": "^7.8.1"
+  },
+  "scripts": {
+    "dev": "nest start --watch",
+    "build": "nest build",
+    "start": "node dist/main"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.14"
+  }
+}

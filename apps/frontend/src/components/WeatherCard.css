@@ -1,0 +1,50 @@
+.weather-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin: 1rem 0;
+  max-width: 400px;
+  margin: 1rem auto;
+}
+
+.weather-icon {
+  flex-shrink: 0;
+}
+
+.weather-icon img {
+  width: 100px;
+  height: 100px;
+}
+
+.weather-info {
+  flex-grow: 1;
+}
+
+.temperature {
+  font-size: 2rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  line-height: 1;
+  margin-bottom: 0.5rem;
+}
+
+.feels-like {
+  font-size: 0.875rem;
+  color: #666;
+  margin-left: 0.5rem;
+}
+
+.description {
+  font-size: 1.25rem;
+  color: #4a4a4a;
+  margin-bottom: 0.5rem;
+}
+
+.humidity {
+  font-size: 0.875rem;
+  color: #666;
+} 

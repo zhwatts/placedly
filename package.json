@@ -1,0 +1,27 @@
+{
+  "name": "placedly-app",
+  "private": true,
+  "packageManager": "npm@10.2.4",
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "dev:backend": "turbo run dev --filter=backend",
+    "dev:frontend": "turbo run dev --filter=frontend",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "clean": "turbo run clean && rm -rf node_modules"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.26.0",
+    "turbo": "latest"
+  },
+  "dependencies": {
+    "@nestjs/common": "^11.0.7",
+    "@nestjs/core": "^11.0.7",
+    "@nestjs/platform-express": "^11.0.7",
+    "@nestjs/swagger": "^11.0.3"
+  }
+}
