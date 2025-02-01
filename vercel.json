@@ -1,6 +1,7 @@
 {
   "buildCommand": "turbo run build",
   "installCommand": "npm install",
+  "outputDirectory": "apps/frontend/dist",
   "routes": [
     {
       "src": "/api/(.*)",
@@ -8,7 +9,7 @@
     },
     {
       "src": "/(.*)",
-      "dest": "apps/frontend/dist/index.html"
+      "dest": "/"
     }
   ],
   "framework": "vite"
