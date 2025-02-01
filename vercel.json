@@ -1,7 +1,7 @@
 {
-  "buildCommand": "turbo run build --filter=frontend^...",
+  "buildCommand": "turbo run build --filter=frontend",
   "installCommand": "npm install",
-  "outputDirectory": "apps/frontend/dist",
+  "outputDirectory": "dist",
   "routes": [
     {
       "src": "/api/(.*)",

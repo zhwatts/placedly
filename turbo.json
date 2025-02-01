@@ -2,7 +2,7 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**"]
+      "outputs": ["apps/frontend/dist/**"]
     },
     "dev": {
       "cache": false,
