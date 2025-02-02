@@ -16,7 +16,10 @@ async function bootstrap() {
   );
 
   app.enableCors({
-    origin: true,
+    origin: [
+      "https://placedly-frontend.vercel.app",
+      "http://localhost:5173", // Keep local development working
+    ],
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
     credentials: true,
   });

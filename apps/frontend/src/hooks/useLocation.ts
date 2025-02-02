@@ -20,6 +20,8 @@ interface Weather {
   humidity: number;
 }
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
+
 export const useLocation = () => {
   const [coordinates, setCoordinates] = useState<GeolocationCoordinates | null>(
     null
@@ -55,7 +57,7 @@ export const useLocation = () => {
             lon: coordinates.longitude,
           }
         : {};
-      const { data } = await axios.get("/api/location", { params });
+      const { data } = await axios.get(`${API_URL}/api/location`, { params });
       return data;
     },
     enabled: coordinates !== null || geoLocationDenied,
@@ -69,7 +71,7 @@ export const useLocation = () => {
     ],
     queryFn: async () => {
       if (!locationQuery.data?.ll) throw new Error("No coordinates available");
-      const { data } = await axios.get("/api/location/weather", {
+      const { data } = await axios.get(`${API_URL}/api/location/weather`, {
         params: {
           lat: locationQuery.data.ll[0],
           lon: locationQuery.data.ll[1],
