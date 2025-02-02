@@ -15,11 +15,15 @@ async function bootstrap() {
     new ExpressAdapter(server)
   );
 
+  const allowedOrigins = [
+    "https://www.placedly.com",
+    "https://placedly.com",
+    "https://placedly-frontend.vercel.app",
+    "http://localhost:5173", // Keep local development working
+  ];
+
   app.enableCors({
-    origin: [
-      "https://placedly-frontend.vercel.app",
-      "http://localhost:5173", // Keep local development working
-    ],
+    origin: allowedOrigins,
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
     credentials: true,
   });
