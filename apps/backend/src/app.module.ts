@@ -1,37 +1,28 @@
 /** @format */
 
-import { Module, NestModule, MiddlewareConsumer } from "@nestjs/common";
-import { AppController } from "./app.controller";
-import { AppService } from "./app.service";
-import * as cors from "cors";
+import { Module } from "@nestjs/common";
+import { ConfigModule } from "@nestjs/config";
 import { LocationModule } from "./location/location.module";
-import { HttpModule } from "@nestjs/axios";
-import { ConfigModule } from "./config/config.module";
+import cors from "cors";
 
 @Module({
   imports: [
-    ConfigModule,
-    HttpModule.register({
-      timeout: 5000,
-      maxRedirects: 5,
+    ConfigModule.forRoot({
+      isGlobal: true,
     }),
     LocationModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [],
+  providers: [],
 })
-export class AppModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
+export class AppModule {
+  configure(consumer) {
     consumer
-      .apply(
-        cors({
-          origin: [
-            process.env.FRONTEND_URL || "http://localhost:5173",
-            /^http:\/\/localhost:\d+$/,  // Allow all localhost ports for development
-          ],
-          credentials: true,
-        })
-      )
+      .apply(cors({
+        origin: true,
+        methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+        credentials: true,
+      }))
       .forRoutes("*");
   }
 }
