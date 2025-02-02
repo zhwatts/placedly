@@ -62,17 +62,19 @@ export class LocationController {
     status: 200,
     description: "Returns weather information",
   })
-  async getWeather(@Query("lat") lat?: string, @Query("lon") lon?: string) {
+  async getWeather(
+    @Req() req: Request,
+    @Query("lat") lat?: string,
+    @Query("lon") lon?: string,
+    @Query("useGeolocation") useGeolocation?: string
+  ) {
     if (!lat || !lon) {
-      throw new HttpException(
-        {
-          status: HttpStatus.BAD_REQUEST,
-          error: "Missing Parameters",
-          message: "Latitude and longitude are required",
-        },
-        HttpStatus.BAD_REQUEST
-      );
+      // If no coordinates provided, try to get them from IP
+      const location = await this.locationService.getLocationFromIP(req);
+      return this.weatherService.getWeather(location.ll[0], location.ll[1]);
     }
+
+    // Use provided coordinates
     return this.weatherService.getWeather(parseFloat(lat), parseFloat(lon));
   }
 }
