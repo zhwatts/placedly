@@ -3,20 +3,11 @@
 import { NestFactory } from "@nestjs/core";
 import { SwaggerModule, DocumentBuilder } from "@nestjs/swagger";
 import { AppModule } from "./app.module";
-import { ExpressAdapter } from "@nestjs/platform-express";
-import * as express from "express";
-import serverlessExpress from "@vendia/serverless-express";
-
-const expressApp = express();
 
 async function bootstrap() {
-  const app = await NestFactory.create(
-    AppModule,
-    new ExpressAdapter(expressApp)
-  );
-  app.enableCors(); // Enable CORS for API access
+  const app = await NestFactory.create(AppModule);
+  app.enableCors();
 
-  // Swagger Configuration
   const config = new DocumentBuilder()
     .setTitle("Placedly API")
     .setDescription("The Placedly API description")
@@ -32,11 +23,7 @@ async function bootstrap() {
     },
   });
 
-  await app.init(); // Initialize NestJS app within Express
+  await app.listen(process.env.PORT || 3001);
 }
 
-// Bootstrap the NestJS app
 bootstrap();
-
-// Export the handler for Vercel's Serverless Functions
-export const handler = serverlessExpress({ app: expressApp });
