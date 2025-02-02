@@ -57,7 +57,7 @@ export const useLocation = () => {
             lon: coordinates.longitude,
           }
         : {};
-      const { data } = await axios.get(`${API_URL}/api/location`, { params });
+      const { data } = await axios.get(`${API_URL}/location`, { params });
       return data;
     },
     enabled: coordinates !== null || geoLocationDenied,
@@ -71,7 +71,7 @@ export const useLocation = () => {
     ],
     queryFn: async () => {
       if (!locationQuery.data?.ll) throw new Error("No coordinates available");
-      const { data } = await axios.get(`${API_URL}/api/location/weather`, {
+      const { data } = await axios.get(`${API_URL}/location/weather`, {
         params: {
           lat: locationQuery.data.ll[0],
           lon: locationQuery.data.ll[1],
