@@ -10,8 +10,11 @@ const server = express();
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, new ExpressAdapter(server));
-
-  app.enableCors();
+  app.enableCors({
+    origin: true,
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
+    credentials: true,
+  });
 
   const config = new DocumentBuilder()
     .setTitle("Placedly API")
@@ -29,8 +32,14 @@ async function bootstrap() {
   });
 
   await app.init();
+  return app;
 }
 
-bootstrap();
+let app: any;
 
-export default server;
+export default async function handler(req: any, res: any) {
+  if (!app) {
+    app = await bootstrap();
+  }
+  server(req, res);
+}
