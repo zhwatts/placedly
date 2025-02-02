@@ -5,6 +5,7 @@ import { HttpService } from "@nestjs/axios";
 import { firstValueFrom } from "rxjs";
 import { Request } from "express";
 import { EnvValidationService } from "../config/env.validation";
+import axios from "axios";
 
 interface IpApiResponse {
   status: string;
@@ -87,12 +88,23 @@ export class LocationService {
   }
 
   private getClientIp(req: Request): string {
+    // Check Vercel-specific headers first
+    const vercelForwardedFor = req.headers["x-vercel-forwarded-for"];
+    if (vercelForwardedFor) {
+      return Array.isArray(vercelForwardedFor)
+        ? vercelForwardedFor[0]
+        : vercelForwardedFor;
+    }
+
+    // Check standard forwarded headers
     const forwardedFor = req.headers["x-forwarded-for"];
     if (forwardedFor) {
       return Array.isArray(forwardedFor)
         ? forwardedFor[0]
         : forwardedFor.split(",")[0];
     }
+
+    // Fallback to direct IP
     return req.ip || req.socket.remoteAddress || "127.0.0.1";
   }
 
@@ -103,5 +115,71 @@ export class LocationService {
       ip === "::ffff:127.0.0.1" ||
       ip === "localhost"
     );
+  }
+
+  async getLocationFromCoordinates(lat: number, lon: number) {
+    try {
+      console.log("Getting location for coordinates:", { lat, lon });
+      const response = await axios.get(
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${lon},${lat}.json`,
+        {
+          params: {
+            access_token: process.env.MAPBOX_TOKEN,
+            types: "place",
+          },
+        }
+      );
+
+      const features = response.data.features;
+      if (!features || features.length === 0) {
+        throw new Error("No location found");
+      }
+
+      const place = features[0];
+      const context = place.context || [];
+
+      const city = place.text;
+      const region = context.find((c: any) => c.id.startsWith("region"))?.text;
+      const country = context.find((c: any) =>
+        c.id.startsWith("country")
+      )?.text;
+
+      console.log("Location found:", { city, region, country });
+
+      return {
+        city,
+        region,
+        country,
+        ll: [lat, lon],
+        isApproximate: false,
+      };
+    } catch (error) {
+      console.error("Error getting location from coordinates:", error);
+      throw error;
+    }
+  }
+
+  async getLocationFromIP(req: Request) {
+    try {
+      const clientIp = this.getClientIp(req);
+      console.log("Client IP:", clientIp);
+
+      // Use ipapi.co with the client's IP
+      const response = await axios.get(`https://ipapi.co/${clientIp}/json/`);
+      const data = response.data;
+
+      console.log("IP location found:", data);
+
+      return {
+        city: data.city,
+        region: data.region,
+        country: data.country_name,
+        ll: [data.latitude, data.longitude],
+        isApproximate: true,
+      };
+    } catch (error) {
+      console.error("Error getting location from IP:", error);
+      throw error;
+    }
   }
 }

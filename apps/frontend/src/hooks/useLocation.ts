@@ -33,30 +33,36 @@ export const useLocation = () => {
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
+          console.log("Browser geolocation success:", position.coords);
           setCoordinates(position.coords);
           setShowLocationWarning(false);
+          setGeoLocationDenied(false);
         },
         (error) => {
-          console.log("Geolocation error:", error);
+          console.error("Browser geolocation error:", error);
           setGeoLocationDenied(true);
           setShowLocationWarning(true);
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 5000,
+          maximumAge: 0,
         }
       );
-    } else {
-      setGeoLocationDenied(true);
-      setShowLocationWarning(true);
     }
   }, []);
 
-  const locationQuery = useQuery<Location>({
+  const locationQuery = useQuery({
     queryKey: ["location", coordinates?.latitude, coordinates?.longitude],
     queryFn: async () => {
       const params = coordinates
         ? {
             lat: coordinates.latitude,
             lon: coordinates.longitude,
+            useGeolocation: "true", // Signal to backend that this is from browser geolocation
           }
         : {};
+      console.log("Sending location request with params:", params);
       const { data } = await axios.get(`${API_URL}/location`, { params });
       return data;
     },

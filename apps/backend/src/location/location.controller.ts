@@ -29,16 +29,31 @@ export class LocationController {
   })
   @ApiQuery({ name: "lat", required: false })
   @ApiQuery({ name: "lon", required: false })
+  @ApiQuery({ name: "useGeolocation", required: false })
   async getLocation(
     @Req() req: Request,
     @Query("lat") lat?: string,
-    @Query("lon") lon?: string
+    @Query("lon") lon?: string,
+    @Query("useGeolocation") useGeolocation?: string
   ) {
-    return this.locationService.getLocation(
-      req,
-      lat ? parseFloat(lat) : undefined,
-      lon ? parseFloat(lon) : undefined
-    );
+    console.log("Received request:", { lat, lon, useGeolocation });
+
+    if (lat && lon) {
+      // If coordinates are from browser geolocation, use Mapbox for accurate city/state
+      if (useGeolocation === "true") {
+        const result = await this.locationService.getLocationFromCoordinates(
+          parseFloat(lat),
+          parseFloat(lon)
+        );
+        console.log("Geolocation result:", result);
+        return result;
+      }
+    }
+
+    // Fallback to IP-based location
+    const result = await this.locationService.getLocationFromIP(req);
+    console.log("IP-based location result:", result);
+    return result;
   }
 
   @Get("weather")
