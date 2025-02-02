@@ -16,5 +16,5 @@
          },
        },
      },
-     base: "./", // Ensure relative paths for assets
+     base: "/", // Ensure relative paths for assets
    });
